@@ -1,0 +1,25 @@
+import os
+import shutil
+import logging
+from datetime import datetime
+
+# Configuration
+SOURCE_DIR = "/path/to/source"
+BACKUP_DIR = "/path/to/backup"
+LOG_FILE = "/var/log/backup.log"
+
+# Setup logging
+logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
+
+def backup_directory(source, backup):
+    try:
+        # Create a backup folder with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        backup_path = os.path.join(backup, f"backup_{timestamp}")
+        shutil.copytree(source, backup_path)
+        logging.info(f"Backup successful: {backup_path}")
+    except Exception as e:
+        logging.error(f"Backup failed: {e}")
+
+if __name__ == "__main__":
+    backup_directory(SOURCE_DIR, BACKUP_DIR)
