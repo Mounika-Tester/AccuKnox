@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Thresholds
+CPU_THRESHOLD=80
+MEM_THRESHOLD=80
+DISK_THRESHOLD=90
+
+# Get metrics
+CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1}')
+MEM_USAGE=$(free | grep Mem | awk '{print $3/$2 * 100.0}')
+DISK_USAGE=$(df -h / | grep / | awk '{ print $5}' | sed 's/%//g')
+
+# Check CPU
+if (( $(echo "$CPU_USAGE > $CPU_THRESHOLD" | bc -l) )); then
+    echo "CPU usage is above $CPU_THRESHOLD%: $CPU_USAGE%" | tee -a /var/log/system_health.log
+fi
+
+# Check Memory
+if (( $(echo "$MEM_USAGE > $MEM_THRESHOLD" | bc -l) )); then
+    echo "Memory usage is above $MEM_THRESHOLD%: $MEM_USAGE%" | tee -a /var/log/system_health.log
+fi
+
+# Check Disk
+if [ $DISK_USAGE -gt $DISK_THRESHOLD ]; then
+    echo "Disk usage is above $DISK_THRESHOLD%: $DISK_USAGE%" | tee -a /var/log/system_health.log
+fi
